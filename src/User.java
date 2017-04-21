@@ -1,4 +1,4 @@
-import java.util.LinkedList;
+
 import java.util.Queue;
 import java.io.*;
 import java.net.*;
@@ -7,13 +7,14 @@ import java.util.*;
 public class User extends Thread {
   static int myMsg;
   static int otherMsg;
-  Queue<Message> outgoing;
+  ArrayList<Message> outgoing;
   static StringBuilder output;
   int highestIndex = 0;
   int lowestIndex = 0;
   int id;
   int myPort;
   int otherPort;
+  String otherIp = null;
   
   // The input stream
   private static BufferedReader input_stream = null;
@@ -41,23 +42,6 @@ public class User extends Thread {
   public GUIManager gui;
   //-------------------- Socket output data ------------------
   private class ReadSocket extends Thread {
-	  //private InputStream is = null;
-	  //private ObjectInputStream ois = null;
-	  
-	  // for now we will just directly establish connection
-	  // need to figure out a way to disconnect and then work
-	  /*
-	  public ReadSocket(InputStream is, ObjectInputStream ois) {
-		  //this.is = is;
-		  //this.ois = ois;
-	  }
-	  
-	  public void establishConnection() {
-		  while (true) {
-			  
-		  }
-	  }
-	  */
 	  
 	  public void run() {
 		  System.out.println("ReadSocket:: run() begin");
@@ -84,23 +68,24 @@ public class User extends Thread {
 	 }
   }
   
-  public User(int myid, int myPort, int OtherPort) {
+  public User(int myid, int myPort, int OtherPort, String otherip) {
 	this.id = myid;
 	this.myPort = myPort;
 	this.otherPort = OtherPort;
     this.myMsg = 0;
     this.otherMsg = 0;
-    outgoing = new LinkedList<Message>();
+    this.otherIp = otherip;
+    outgoing = new ArrayList<Message>();
   }
   
   public void setGui(GUIManager gui) {
 	  this.gui = gui;
   }
   
-  public void send(Message msg) {
+  public synchronized void send(Message msg) {
 	  outgoing.add(msg);
-	  //.msg.myMsg += 1;
 	  try {
+		  System.out.println("User" + id+ "Sending message" + msg);
 		  oos.writeObject(msg);
 	  }catch (Exception e) {
 		  System.out.println("User::Send() Exception when writing msg to socket"); 
@@ -111,6 +96,19 @@ public class User extends Thread {
 	   // send to GUI
 	  // make it non editable
 	  // transform and apply
+	  for (Message m:outgoing) {
+		  if (m.myMsg < msg.OtherMsg) {
+			  outgoing.remove(m);
+		  }
+	  }
+	  
+	  for (int i=0; i < outgoing.size(); ++i) {
+		  if (msg.operation == Message.Op.NOOP || outgoing.get(i).operation == Message.Op.NOOP)
+			  continue;
+		  Message[] transformed = Message.xform(msg,outgoing.get(i));
+		  msg = transformed[0];
+		  outgoing.set(i, transformed[1]);
+	  }
 	  
 	  if (msg.operation == Message.Op.INSERT) {
 		  int index = msg.index;
@@ -132,6 +130,7 @@ public class User extends Thread {
 	    listen_t.start();
 	    System.out.println("Here");
 	    boolean connected = false;
+	    
 	  while (true) {
 		  try {
 				Thread.sleep(3000);
@@ -141,8 +140,7 @@ public class User extends Thread {
 			if (connected)
 				continue;
 		  try {
-		    	System.out.println("In Main");
-		        userSocket = new Socket("127.0.0.1",otherPort);
+		        userSocket = new Socket(otherIp,otherPort);
 		        connected = true;
 		        OutputStream os = userSocket.getOutputStream();
 		        oos = new ObjectOutputStream(os);

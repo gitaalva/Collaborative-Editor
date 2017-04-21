@@ -42,6 +42,24 @@ public class Message implements Serializable {
 	  return output;
   }
   
+  public static Message[] delete_insert(Message m1, Message m2) {
+	  Message r1 = new Message(m1);
+	  Message r2 = new Message(m2);
+	  
+	  if (m1.index > m2.index) {
+		  r1.index++;
+	  } else if (m1.index < m2.index) {
+		  r2.index--;
+	  } if (m1.index == m2.index) {
+		  r1.index++;
+	  }
+	  
+	  Message[] output = new Message[2];
+	  output[0] = r1;
+	  output[1] = r2;
+	  return output;
+  }
+  
   public static Message[] insert_insert(Message m1, Message m2) {
 	  Message r1 = new Message(m1);
 	  Message r2 = new Message(m2);
@@ -85,9 +103,9 @@ public class Message implements Serializable {
 		 return delete_delete(m1, m2);
 	  } else if (m1.operation == Op.INSERT && m2.operation == Op.DELETE) {
 		  return insert_delete(m1, m2);
-	  } else  /*(m1.operation == Op.DELETE && m2.operation == Op.INSERT) */{
+	  } else  /*if (m1.operation == Op.DELETE && m2.operation == Op.INSERT) */{
 		  System.out.println("Message::xform():: WARNING WARNING WARNING UNRELIABLE MESSAGE");
-		  return insert_delete(m2,m1);
+		  return delete_insert(m1,m2);
 	  }
   }
   
