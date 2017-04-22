@@ -82,7 +82,7 @@ public class User extends Thread {
 	  this.gui = gui;
   }
   
-  public synchronized void send(Message msg) {
+  public void send(Message msg) {
 	  outgoing.add(msg);
 	  try {
 		  System.out.println("User" + id+ "Sending message" + msg);
