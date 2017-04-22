@@ -96,6 +96,7 @@ public class User extends Thread {
 	   // send to GUI
 	  // make it non editable
 	  // transform and apply
+	  System.out.println(id + " Received msg " + msg);
 	  for (Message m:outgoing) {
 		  if (m.myMsg < msg.OtherMsg) {
 			  outgoing.remove(m);
@@ -110,6 +111,8 @@ public class User extends Thread {
 		  outgoing.set(i, transformed[1]);
 	  }
 	  
+	  System.out.println("After transformation the message becomes" + msg);
+	  
 	  if (msg.operation == Message.Op.INSERT) {
 		  int index = msg.index;
 		  char val = msg.val;
@@ -118,6 +121,7 @@ public class User extends Thread {
 		  int index = msg.index;
 		  gui.deleteChar(index);
 	  }
+	  this.otherMsg += 1;
   }
   
   public void run() {
