@@ -4,7 +4,8 @@ public class Main {
 		 int userNumber = Integer.parseInt(args[0]);
 		 int myPort = Integer.parseInt(args[1]);
 		 int otherPort = Integer.parseInt(args[2]);
-		 User user1 = new User(userNumber, myPort, otherPort);
+		 String otherIp = args[3];
+		 User user1 = new User(userNumber, myPort, otherPort,otherIp);
 		 GUIManager gui = new GUIManager(user1,0);
 		 user1.setGui(gui);
 		 user1.start();
